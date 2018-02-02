@@ -21,13 +21,13 @@
 class OaiPmhRepository_OaiIdentifier {
     const OAI_IDENTIFIER_NAMESPACE_URI = 'http://www.openarchives.org/OAI/2.0/oai-identifier';
     const OAI_IDENTIFIER_SCHEMA_URI = 'http://www.openarchives.org/OAI/2.0/oai-identifier.xsd';
-    
+
     private static $namespaceId;
-    
+
     public static function initializeNamespace($namespaceId) {
         self::$namespaceId = $namespaceId;
     }
-    
+
     /**
      * Converts the given OAI identifier to an Omeka item ID.
      *
@@ -35,15 +35,25 @@ class OaiPmhRepository_OaiIdentifier {
      * @return string Omeka item ID.
      */
     public static function oaiIdToItem($oaiId) {
+
         $scheme = strtok($oaiId, ':');
         $namespaceId = strtok(':');
-        $localId = strtok(':');
-        if ($scheme != 'oai' || $namespaceId != self::$namespaceId || $localId < 0) {
+        // $localId = strtok(':');
+
+        $prefix = 'oai:' . self::$namespaceId . ":";
+        $identifier = ltrim($oaiId, $prefix);
+
+        if ($scheme != 'oai' || $namespaceId != self::$namespaceId || !$identifier) {
            return NULL;
         }
-        return $localId;
+
+        $res  = get_db()->getTable('ElementText')->findBy(array("record_type" => "Item", "element_id" => 43, "text" => $identifier));
+        if (!$res[0]->record_id)
+            return NULL;
+
+        return $res[0]->record_id;
     }
-    
+
     /**
      * Converts the given Omeka item ID to a OAI identifier.
      *
@@ -51,9 +61,17 @@ class OaiPmhRepository_OaiIdentifier {
      * @return string OAI identifier.
      */
     public static function itemToOaiId($itemId) {
-        return 'oai:' . self::$namespaceId . ':' . $itemId;
+
+        // return 'oai:' . self::$namespaceId . ':' . $itemId;
+
+        $item = get_record_by_id('Item', $itemId);
+        $dcIdentifier  = metadata($item, array("Dublin Core", "Identifier"));
+        if (isset($dcIdentifier))
+            return 'oai:' . self::$namespaceId . ':' . $dcIdentifier;
+        else
+            return 'oai:' . self::$namespaceId . ':' . $itemId;
     }
-    
+
     /**
      * Outputs description element child describing the repository's OAI
      * identifier implementation.
@@ -61,15 +79,21 @@ class OaiPmhRepository_OaiIdentifier {
      * @param DOMElement $parentElement Parent DOM element for XML output
      */
     public static function describeIdentifier($parentElement) {
+    	$INSTITUTION_isni_identifier = "/isni0000000XXXXXX";
         $elements = array(
             'scheme'               => 'oai',
             'repositoryIdentifier' => self::$namespaceId,
             'delimiter'            => ':',
-            'sampleIdentifier'     => self::itemtoOaiId(1)
-        );
-        $oaiIdentifier = $parentElement->appendNewElementWithChildren('oai-identifier', $elements);
-        
-        //must set xmlns attribute manually to avoid DOM extension appending 
+            'sampleIdentifier'     => self::itemtoOaiId(55) );
+            // 'sampleIdentifier'     => self::itemtoOaiId(1).$INSTITUTION_isni_identifier );
+        $oaiIdentifier = $parentElement->ownerDocument->createElement('oai-identifier');
+        foreach($elements as $tag => $value)
+        {
+            $oaiIdentifier->appendChild($parentElement->ownerDocument->createElement($tag, $value));
+        }
+        $parentElement->appendChild($oaiIdentifier);
+
+        //must set xmlns attribute manually to avoid DOM extension appending
         //default: prefix to element name
         $oaiIdentifier->setAttribute('xmlns', self::OAI_IDENTIFIER_NAMESPACE_URI);
         $oaiIdentifier->setAttribute('xsi:schemaLocation',
