@@ -1,5 +1,6 @@
 # OaiPmhRepository
 OAI-PMH repository plugin for Omeka, fork for specific needs of ENPC.
+Le fork de ce plugin permet d'exposer les données structurées au format Dublin Core dans des sets regoupant les items ayant la même typologie documentaire. Les données peuvent ainsi être moissonnées par Gallica.
 
 # Contexte
 Les modifications opérées sur le plug-in OAI-PMH Repository de Omeka ont été réalisées en 2015 par Limonade and Co dans le cadre du projet de signalement des données de la Bibliothèque numérique patrimoniale de l’École des Ponts ParisTech dans Gallica.
