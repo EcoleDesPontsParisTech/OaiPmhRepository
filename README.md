@@ -80,4 +80,4 @@ Tableau de correspondance des valeurs admises dans dc:type (Source BnF)
 |plan	| plan	| image|
 
 # Consultation de l’entrepôt
-La navigation sur l’entrepôt est facilitée grâce à la création d’une feuille de style CSS qui peut être générée par le plugin. Elle est à déposer dans le thème omeka que vous utilisez.
+La navigation sur l’entrepôt est facilitée grâce à la création d’une feuille de style CSS et un fichier XSL. Il convient de  déposer le répertoire "oai-pmh" dans le thème omeka que vous utilisez.
