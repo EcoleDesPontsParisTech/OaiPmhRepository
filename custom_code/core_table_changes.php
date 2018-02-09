@@ -1,5 +1,5 @@
 	/**
-	 * Tese are custom  methods changes made in Omeka Table models :
+	 * These are custom  methods changes made in Omeka Table models :
 	 */
 	    
     /**
